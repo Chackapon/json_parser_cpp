@@ -5,6 +5,8 @@
 
 A C++ shared library that contains a class that allows you to parse a JSON file or string into something, that functions like Python's json library.
 
+This project uses ```json``` namespace
+
 ## Usage
 ### Parsing
 Once you create a JSON_Tree object there are two ways to input data in it: 
