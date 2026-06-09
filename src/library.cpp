@@ -42,10 +42,10 @@ namespace json {
     std::string JSON_Tree::display() const { return root->display(); }
 
 
-    JSON_Node *JSON_Tree::parse(std::string str, int depth)  {
+    JSON_Object *JSON_Tree::parse(std::string str, int depth)  {
 
             this->remainder_backtrack.clear();
-            auto* node = new JSON_Node();
+            auto* node = new JSON_Object();
 
             std::cout << "@ JSON_Node at " << (void*)node << std::endl;
             std::cout << "@ Depth " << depth << ": " << str << std::endl;
@@ -56,7 +56,7 @@ namespace json {
             json_value_type type = INTEGER; // default should be int
 
 
-            JSON_Node* child = nullptr;
+            JSON_Object* child = nullptr;
 
             for ( int i = 0; i < str.length(); i++ ) {
                 std::cout << std::format("> [DEPTH={}] Character at {}/{}: \'{}\' (state={})", depth, i, str.length(), str[i], std::to_string(state)) << std::endl;
@@ -183,7 +183,7 @@ namespace json {
     }
 
 
-    json_entry_datatype convert(std::string value, const json_value_type to_type, JSON_Node* node_pointer) {
+    json_entry_datatype convert(std::string value, const json_value_type to_type, JSON_Object* node_pointer) {
         switch (to_type) {
             case STRING:
                 return value;
@@ -205,7 +205,7 @@ namespace json {
             case DICT:
                 return node_pointer;
             case NULL_TYPE:
-                return new EmptyValue;
+                return new JSON_Null;
             default:
                 throw std::runtime_error("Undefined node type");
         }
