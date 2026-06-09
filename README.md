@@ -1,7 +1,7 @@
 # JSON Parser for C++
 
-[![pl](https://img.shields.io/badge/lang-pl-red.svg)](lang/README.pl.md)
-[![en](https://img.shields.io/badge/lang-en-blue.svg)](lang/README.en.md)
+[![pl](https://img.shields.io/badge/lang-pl-red.svg)](https://github.com/Chackapon/json_parser_cpp/blob/main/lang/README.pl.md)
+[![en](https://img.shields.io/badge/lang-en-blue.svg)](https://github.com/Chackapon/json_parser_cpp/blob/main/lang/README.en.md)
 
 A C++ shared library that contains a class that allows you to parse a JSON file or string into something, that functions like Python's json library.
 
