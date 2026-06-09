@@ -14,7 +14,7 @@ app: src/main.cpp $(LIB_NAME)
 	$(CXX) $(CXXFLAGS) -Lshared -ljsonparser -Wl,-rpath,@executable_path -o exe/app.x src/main.cpp
 
 run: all
-	./app.x
+	./exe/app.x
 
 clean:
 	rm -f *.dylib app
