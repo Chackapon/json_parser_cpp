@@ -8,10 +8,13 @@ A C++ shared library that contains a class that allows you to parse a JSON file 
 Version history
 * [09.06.26, 03:09] v0.1: first public release. Still a lot to be done but the basic parser object is complete
 
-TO-DO
-[ ] Support for arrays
-[ ] operator[] overload
-[ ] Actual release on github
-[ ] Some metadata for the library
-[ ] JSON Writer
-[ ] Rewrite without recursion
+Features
+- [x] Support for values of primitive types: int, float, bool, string, null
+- [x] Support for dictionaries
+- [ ] Support for arrays
+- [ ] operator[] overload
+- [ ] Actual release on github
+- [ ] Some metadata for the library
+- [ ] Automatic Python tester that generates random json file and plots performance vs other libraries
+- [ ] JSON Writer
+- [ ] Rewrite without recursion
