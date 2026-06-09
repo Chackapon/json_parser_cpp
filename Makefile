@@ -10,7 +10,8 @@ $(LIB_NAME): src/library.cpp
 	$(CXX) $(CXXFLAGS) -dynamiclib -o shared/$@ $^
 
 app: src/main.cpp $(LIB_NAME)
-	$(CXX) $(CXXFLAGS) -Lshared -ljsonparser -Wl,-rpath,@executable_path -o app.x src/main.cpp
+	mkdir -p exe
+	$(CXX) $(CXXFLAGS) -Lshared -ljsonparser -Wl,-rpath,@executable_path -o exe/app.x src/main.cpp
 
 run: all
 	./app.x
