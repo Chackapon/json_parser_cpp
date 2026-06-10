@@ -4,6 +4,8 @@
 #include <cassert>
 #include <fstream>
 
+
+// must do this until it finds a bracket that's not in the value section
 size_t rfind_character(const std::string& str, const char symbol, const int n) {
     assert(n > 0);
     size_t current_bracket_position = 0;
@@ -42,16 +44,16 @@ namespace json {
 
     std::string JSON_Tree::display() const { return root->display(); }
 
-    JSON_Object *JSON_Tree::parse(std::string str, int depth)  {
-
-            this->remainder_backtrack.clear();
+    JSON_Object* JSON_Tree::parse(std::string str, int depth)  {
+        this->remainder_backtrack.clear();
             auto* node = new JSON_Object();
 
             std::cout << "@ JSON_Node at " << (void*)node << std::endl;
             std::cout << "@ Depth " << depth << ": " << str << std::endl;
         // TODO not all of those enum values are used, cleanup
-            enum state {CURIOUS, END, DICT_BEGIN, DICT_END, DICTIONARY, ARR_BEGIN, ARR_END, ARRAY, KEY, VALUE}; //TODO move outside function
+            enum state {CURIOUS, END, DICT_OPENED, DICT_CLOSED, DICTIONARY, ARR_OPENED, ARR_CLOSED, ARRAY, KEY, VALUE}; //TODO move outside function
             state state = KEY;
+            bool string_key_validation = true;
             std::string key, value;
             json_value_type type = INTEGER; // default should be int
 
@@ -59,36 +61,80 @@ namespace json {
             JSON_Object* child = nullptr;
 
             for ( int i = 0; i < str.length(); i++ ) {
-                std::cout << std::format("> [DEPTH={}] Character at {}/{}: \'{}\' (state={})", depth, i, str.length(), str[i], std::to_string(state)) << std::endl;
+                std::cout << std::format("> [DEPTH={}] Character at {}/{}: \'{}\' (state={}); (type={})", depth, i, str.length(), str[i], std::to_string(state), json_entry_typenames[type]) << std::endl;
 
 
 
                 switch ( str[i] ) {
                     case '{': {
-                        state = DICT_BEGIN;
-                        std::cout << "Opening dictionary object at depth " << depth+1 << std::endl;
 
-                        std::size_t end_bracket_pos = rfind_character(str, '}', 1);
-                        std::string sub_string = str.substr(i+1, end_bracket_pos - i - 1);
-                        std::cout << "* Subsection: " << sub_string << std::endl;
+                        if (state == KEY and type == STRING) key += str[i];
+                        else if (state == VALUE and type == STRING) value += str[i];
+                        else {
+                            state = DICT_OPENED;
 
-                        std::string remainder = str.substr(0, i +1) + "@@@" + str.substr(end_bracket_pos+1 -1, str.length()-1);
-                        std::cout << "* Remainder: " << remainder << std::endl;
 
-                        child = parse(sub_string, depth+1);
+                            std::size_t end_bracket_pos = rfind_character(str, '}', 1); // TODO replave this function
+                            std::string sub_string = str.substr(i+1, end_bracket_pos - i - 1);
+                            std::string remainder;
 
-                        remainder = str.substr(0, i +1) + this->remainder_backtrack.back() + str.substr(end_bracket_pos+1 -1, str.length()-1);
-                        this->remainder_backtrack.pop_back();
-                        std::cout << "* New Remainder: " << remainder << std::endl;
-                        str = remainder;
-                        type = DICT;
+                            std::cout << "Opening dictionary object at depth " << depth+1 << std::endl;
+                            std::cout << "* Subsection: " << sub_string << std::endl;
+                            remainder = str.substr(0, i +1) + "@@@" + str.substr(end_bracket_pos+1 -1, str.length()-1);
+                            std::cout << "* Remainder: " << remainder << std::endl;
 
+                            child = parse(sub_string, depth+1);
+
+                            remainder = str.substr(0, i +1) + this->remainder_backtrack.back() + str.substr(end_bracket_pos+1 -1, str.length()-1);
+                            this->remainder_backtrack.pop_back();
+                            std::cout << "* New Remainder: " << remainder << std::endl;
+                            str = remainder;
+                            type = DICT_TYPE;
+
+
+                        }
                         break;
                     }
 
+                    case '[': {
+
+                        if (state == KEY and type == STRING) key += str[i];
+                        else if (state == VALUE and type == STRING) value += str[i];
+                        else {
+                            state = ARR_OPENED;
+
+
+                            std::size_t end_bracket_pos = rfind_character(str, ']', 1); // TODO replave this function
+                            std::string sub_string = str.substr(i+1, end_bracket_pos - i - 1);
+                            std::string remainder;
+
+                            std::cout << "Opening array object at depth " << depth+1 << std::endl;
+                            std::cout << "* Subsection: " << sub_string << std::endl;
+                            remainder = str.substr(0, i +1) + "@@@" + str.substr(end_bracket_pos+1 -1, str.length()-1);
+                            std::cout << "* Remainder: " << remainder << std::endl;
+
+                            child = parse(sub_string, depth+1);
+
+                            remainder = str.substr(0, i +1) + this->remainder_backtrack.back() + str.substr(end_bracket_pos+1 -1, str.length()-1);
+                            this->remainder_backtrack.pop_back();
+                            std::cout << "* New Remainder: " << remainder << std::endl;
+                            str = remainder;
+                            type = ARR;
+
+
+                        }
+                        break;
+                    }
+                    case ']':
                     case '}': {
-                        if (state != DICT_BEGIN) {
-                            state = DICT_END;
+                        // std::cout << std::to_string(state) << json_entry_typenames[type] << std::endl;
+                        if (state == KEY) key += str[i];
+                        else if (state == VALUE and type == STRING and type != DICT_TYPE and type != ARR) value += str[i];
+                        else if (state == DICT_OPENED) {
+                            state = DICT_CLOSED;
+                        }
+                        else if (state == ARR_OPENED) {
+                            state = ARR_CLOSED;
                         }
                         else state = VALUE;
 
@@ -97,26 +143,50 @@ namespace json {
                         break;
                     }
                     case ':': {
+                        if (!string_key_validation) throw std::runtime_error("Spotted an invalid JSON object key");
                         std::cout << "Semicolon, changing to VALUE if KEY" << std::endl;
                         if (state == KEY) {
                             state = VALUE;
                         }
+                        type = INTEGER;
                         break;
                     }
                     case ',': {
-                        if (state == VALUE) {
+                        if (state == VALUE or state == DICT_CLOSED or state == ARR_CLOSED) {
                             // if (value == "true" or value == "false") {type = BOOLEAN;} // FIXME what the hell
-                            std::cout << "Comma spotted after value, adding entry to node" << std::endl;
+                            std::cout << "Comma spotted after value, adding entry to dict" << std::endl;
                             if (type!= STRING and (value == "true" or value == "false")) {type = BOOLEAN;}
                             if (type!= STRING and value == "null") {type = NULL_TYPE;}
                             std::cout << std::format("read key={} and value={} of type {} with child={}", key, value, type_map[type], static_cast<void *>(child)) << std::endl;
                             node->addDictEntry( key, value, type, child );
 
                             state = KEY;
+                        } else if (state == KEY) {
+                            std::cout << "Comma spotted after key, adding entry to array" << std::endl;
+                            if (type!= STRING and (value == "true" or value == "false")) {type = BOOLEAN;}
+                            if (type!= STRING and value == "null") {type = NULL_TYPE;}
+                            std::cout << std::format("read key={} and value={} of type {} with child={}", std::to_string(node->array_iterator), key, type_map[type], static_cast<void *>(child)) << std::endl;
+                            node->addArrEntry( key, type, child );
+
+                        } else {
+                            throw std::runtime_error("Unexpected parser state at ',' character");
                         }
+
                         break;
                     }
                     case '\"': {
+                        if (state == KEY) {
+                            std::cout << "Quotation mark spotted when reading key" << std::endl;
+                            if (string_key_validation) {
+                                type = STRING;
+                                string_key_validation = false;
+                                std::cout << "Starting validation of a string key" << std::endl;
+                            } else {
+                                // type = INTEGER;
+                                string_key_validation = true;
+                                std::cout << "String key validated" << std::endl;
+                            }
+                        }
                         if (state == VALUE) {
                             // if (!key_validated) throw std::runtime_error("Key error");
                             type = STRING;
@@ -148,7 +218,7 @@ namespace json {
 
                 }
 
-                if ( state == DICT_END || i == str.length()-1 ) {
+                if ( i == str.length()-1 ) {
                     std::cout << "DICTIONARY END at " << i << "/" << str.length()-1 << std::endl;
 
                     std::cout << "! Remainder: " << str.substr(i) << std::endl;
@@ -160,7 +230,7 @@ namespace json {
                     if ( depth == 0 ) {
                         key = "@root";
                         // type = ROOT;
-                        type = DICT;
+                        type = DICT_TYPE;
                     }
 
                     if (type != NONE and i!= 0) { // TODO change this, none type shouldn't be possible
@@ -191,6 +261,7 @@ namespace json {
         switch (to_type) {
             case STRING:
                 this->value = str_value;
+                break;
             case INTEGER:
                 try {
                     this->value = std::stoi( str_value );
@@ -198,23 +269,30 @@ namespace json {
                     std::cout << "Probably empty record: " << e.what();
                     exit(-1);
                 }
+                break;
             case FLOAT:
                 this->value = std::stof( str_value );
+                break;
             case BOOLEAN:
                 this->value = str_value == "true";
+                break;
             case ARR:
-                throw std::runtime_error("Arrays are not implemented yet");
-            case DICT:
+                // throw std::runtime_error("Arrays are not implemented yet");
                 this->value = node_pointer;
+                break;
+            case DICT_TYPE:
+                this->value = node_pointer;
+                break;
             case NULL_TYPE:
                 this->value = new JSON_Null;
+                break;
             default:
                 throw std::runtime_error("Trying to create a JSON_Value struct with undefined data type.");
         }
     }
 
     JSON_Value::~JSON_Value() {
-        if ( this->type == DICT or this->type == ARR ) delete get<JSON_Object*>(this->value);
+        if ( this->type == DICT_TYPE or this->type == ARR ) delete get<JSON_Object*>(this->value);
         if ( this->type == NULL_TYPE ) delete get<JSON_Null*>(this->value);
     }
 
@@ -280,7 +358,7 @@ namespace json {
                         break;
                     case ARR:
                     // case ROOT:
-                    case DICT:
+                    case DICT_TYPE:
                         // std::cout << "first value(dict): " << get<::JSON_Node*>(val.first) << std::endl;
                         result += get<JSON_Object*>(val->value)->display(depth+1);
                         break;
