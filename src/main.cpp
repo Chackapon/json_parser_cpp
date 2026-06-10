@@ -1,5 +1,5 @@
 //
-// Created by Mateusz Miliutin on 08/06/2026.
+// Created by Mateusz M on 08/06/2026.
 //
 
 #include "../include/library.h"
