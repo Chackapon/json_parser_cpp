@@ -15,7 +15,7 @@ Once you create a JSON_Tree object there are two ways to input data in it:
 
 Regardless of the function used JSON_Tree then starts parsing the json code by first stripping it of white spaces and then building an internal tree consisting of JSON_Object objects.
 
-JSON_Object is a struct that contains two fields: "type" which is and enum o possible json value types and "value" which is an alias for an std::variant type with all primitive types supported by JSON (including a custom struct JSON_Null meant to represent "null") as well as a pointer to JSON_Object type. This way JSON_Object can store every possible json value that can be accessed with a string key.
+JSON_Object is a struct that contains two fields: "type" which is an enum of possible json value types and "value" which is an alias for an std::variant type with all primitive types supported by JSON (including a custom struct JSON_Null meant to represent "null") as well as a pointer to JSON_Object type. This way JSON_Object can store every possible json value that can be accessed with a string key.
 
 ### Data extraction
 
@@ -28,6 +28,7 @@ JSON_Object has two function for data extraction:
 * [09.06.26, 03:09] v0.1: first public release. Still a lot to be done but the basic parser object is complete
 * [10.06.26, 01:11] v0.2: added basic support for extraction of data from parsed json and changed how data is stored in nodes from a pair to a struct
 * [10.06.26, 20:45] v0.2.1: Turns out getting rid of the "as()" function is kinda impossible. I tried multiple ways to do that, but to no effect. I then checked how boostJSON does it's syntax and basically they do something similar to me. For the sake of readability i changed the name of the previous "value()" function to as. Also fixed one of the special characters for string types, you can now have '{' character both in keys and values.
+* [10.06.26, 22:42] v0.3: Completely rewrote the way that closing brackets are found, this method might be more resource intensive but it's much less buggy. A version without recursion is much more possible with this function implemented now. String validation uses a similar method now, which means that all special characters should work now (though the ```"``` character might not be working). More progress on arrays, one dimensional arrays are implemented but use string keys for now.
 
 Features
 - [x] Support for values of primitive types: int, float, bool, string, null

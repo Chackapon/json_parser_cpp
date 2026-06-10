@@ -47,6 +47,7 @@ namespace json {
 
 
     struct JSON_Null {};
+    struct JSON_RootKey {};
     using json_entry_datatype = std::variant<int, float, bool, std::string, JSON_Null*, JSON_Object*>;
     inline std::map<int, std::string> json_entry_typenames {
         {0, "int"},
@@ -60,7 +61,7 @@ namespace json {
 
 
 
-
+    using JSON_Key = std::variant<int, std::string>;
     struct JSON_Value {
         json_entry_datatype value;
         json_value_type type;
@@ -69,16 +70,13 @@ namespace json {
         ~JSON_Value();
     };
 
-    struct JSON_Node {
-        JSON_Node operator[]( const std::string& key );
-    };
+    struct JSON_Node { };
 
     using json_return_type = std::variant<JSON_Object, json_entry_datatype>;
 
     struct JSON_Object {
         std::unordered_map<std::string, JSON_Value*> value_map;
         int array_iterator = 0;
-        json_entry_datatype value;
 
         void addDictEntry(std::string &key, std::string &val, json_value_type &to_type, JSON_Object *node_pointer);
         void addArrEntry( std::string &val, json_value_type &to_type, JSON_Object *node_pointer);
@@ -94,7 +92,7 @@ namespace json {
 
             if (requested_entry_it != this->value_map.end()) {
                 // if (requested_entry_it->second.second == DICT) {
-                if (requested_entry_it->second->type == DICT_TYPE) {
+                if (requested_entry_it->second->type == DICT_TYPE or requested_entry_it->second->type == ARR) {
                     // auto current_node = get<JSON_Node*>( requested_entry_it->second.first );
                     auto current_node = get<JSON_Object*>( requested_entry_it->second->value );
                     for (auto e :current_node->value_map) {
@@ -104,7 +102,7 @@ namespace json {
                     std::cout << std::endl;
                     return *( get<JSON_Object*>( requested_entry_it->second->value ) );
                 }
-                throw std::runtime_error("not a dict");
+                throw std::runtime_error("not a dict or arr");
             }
             throw std::runtime_error("key not found");
         }
@@ -126,17 +124,6 @@ namespace json {
             }
             throw std::runtime_error("key not found");
     }
-
-        template <typename T>
-        T as() {
-            try {
-                return get<T>(value);
-            } catch ( std::bad_variant_access& ) {
-                // throw std::runtime_error("requested value type for key \"" + value_it->first + "\" doesn't match the one being accessed: "+type_map[value_it->second.second]);
-                throw std::runtime_error("requested value type doesn't match the one being accessed");
-            }
-        }
-
 
         std::string display(int depth = 0);
     };
@@ -167,6 +154,8 @@ namespace json {
         }
 
     };
+
+    size_t find_closing_symbol_distance(const std::string& str, size_t pos, char symbol);
 }
 
 #endif // JSON_PARSER_LIBRARY_H
