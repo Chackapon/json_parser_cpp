@@ -22,6 +22,7 @@ size_t rfind_character(const std::string& str, const char symbol, const int n) {
 
 namespace json {
 
+    //region === JSON_Tree ===
     void JSON_Tree::setDirectory(const std::string &path) {
         this->json_directory = path;
     }
@@ -40,7 +41,6 @@ namespace json {
     }
 
     std::string JSON_Tree::display() const { return root->display(); }
-
 
     JSON_Object *JSON_Tree::parse(std::string str, int depth)  {
 
@@ -181,35 +181,124 @@ namespace json {
         root = parse(single_line_json );
         std::cout << "PARSING COMPLETED" << std::endl;
     }
+    //endregion
 
 
-    json_entry_datatype convert(std::string value, const json_value_type to_type, JSON_Object* node_pointer) {
+    //region === JSON_Value ===
+    JSON_Value::JSON_Value(std::string &str_value, json_value_type to_type, JSON_Object *node_pointer) {
+        this->type = to_type;
+
         switch (to_type) {
             case STRING:
-                return value;
+                this->value = str_value;
             case INTEGER:
                 try {
-                    return std::stoi(value);
+                    this->value = std::stoi( str_value );
                 } catch ( std::invalid_argument& e ) {
                     std::cout << "Probably empty record: " << e.what();
                     exit(-1);
                 }
             case FLOAT:
-                return std::stof(value);
-            case CHAR:
-                return static_cast<char>(value[0]); // NOTE is it safe to do it like this?
+                this->value = std::stof( str_value );
             case BOOLEAN:
-                return static_cast<bool>(value == "true");
+                this->value = str_value == "true";
             case ARR:
-                // case ROOT:
+                throw std::runtime_error("Arrays are not implemented yet");
             case DICT:
-                return node_pointer;
+                this->value = node_pointer;
             case NULL_TYPE:
-                return new JSON_Null;
+                this->value = new JSON_Null;
             default:
-                throw std::runtime_error("Undefined node type");
+                throw std::runtime_error("Trying to create a JSON_Value struct with undefined data type.");
         }
     }
+
+    JSON_Value::~JSON_Value() {
+        if ( this->type == DICT or this->type == ARR ) delete get<JSON_Object*>(this->value);
+        if ( this->type == NULL_TYPE ) delete get<JSON_Null*>(this->value);
+    }
+
+    //endregion
+
+    //region === JSON_Object ===
+    void JSON_Object::addDictEntry(std::string &key, std::string &val, json_value_type &to_type, JSON_Object *node_pointer) {
+        this->value_map[key] = new JSON_Value( val, to_type, node_pointer );
+        key = "";
+        val = "";
+        node_pointer = nullptr;
+        to_type = INTEGER;
+    }
+
+    void JSON_Object::addArrEntry(std::string &val, json_value_type &to_type, JSON_Object *node_pointer) {
+        this->value_map[std::to_string( this->array_iterator++ )] = new JSON_Value( val, to_type, node_pointer );
+        val = "";
+        node_pointer = nullptr;
+        to_type = INTEGER;
+    }
+
+    std::string JSON_Object::display(int depth)  {
+        // std::cout << "<At node " << this << ">" << std::endl;
+        // std::cout << this->value_map.size() << std::endl;
+
+        std::string result;
+
+        if (!this->value_map.empty()) {
+            if (depth!=-1) result += '\n';
+
+            for ( auto [k, val] : value_map ) {
+                for (int tab_it = 0; tab_it<depth; ++tab_it) result+='\t';
+                if (depth!=-1) {
+                    // if (val.second != NONE) result += "str(" + k + ") : ";
+                    if (val->type != NONE) result += "str(" + k + ") : ";
+                    else result += "none(";
+                }
+                // result += type_map[val.second] + "(";
+                result += type_map[val->type] + "(";
+
+                // std::cout << "first index: " << json_entry_typenames[val.first.index()] << std::endl;
+                switch (val->type) {
+                // switch (val.second) {
+                    case STRING:
+                        // std::cout << "first value(str): " << get<std::string>(val.first) << std::endl;
+                        result += get<std::string>(val->value);
+                        break;
+                    case INTEGER:
+                        // std::cout << "first value(int): " << get<int>(val.first) << std::endl;
+                        result += std::to_string( get<int>(val->value) );
+                        break;
+                    case FLOAT:
+                        // std::cout << "first value(float): " << get<float>(val.first) << std::endl;
+                        result += std::to_string( get<float>(val->value) );
+                        break;
+                    case BOOLEAN:
+                        // std::cout << "first value(bool): " << get<bool>(val.first) << std::endl;
+                        if ( get<bool>(val->value) ) result += "true";
+                        else result += "false";
+                        break;
+                        // result += std::to_string( get<bool>(val.first) );
+                    case NULL_TYPE:
+                        break;
+                    case ARR:
+                    // case ROOT:
+                    case DICT:
+                        // std::cout << "first value(dict): " << get<::JSON_Node*>(val.first) << std::endl;
+                        result += get<JSON_Object*>(val->value)->display(depth+1);
+                        break;
+                    default:
+
+                        throw std::runtime_error("Undefined node value type");
+                }
+
+                result += "),\n";
+            }
+            for (int tab_it = 0; tab_it<depth-1; ++tab_it) result+='\t';
+            result += "";
+        }
+        return result;
+    }
+
+    //endregion
+
 
 
 }
