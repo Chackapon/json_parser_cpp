@@ -6,15 +6,21 @@ LIB_NAME = libjsonparser.dylib
 
 all: $(LIB_NAME) app
 
-$(LIB_NAME): src/library.cpp
+%.o: %.cpp
+	$(CXX) $(CXXFLAGS) -c $< -o $@
+
+LIB_SRC = src/JSON_Node.cpp src/JSON_Parser.cpp src/JSON_Value.cpp
+LIB_OBJ = $(LIB_SRC:.cpp=.o)
+
+$(LIB_NAME): $(LIB_OBJ)
 	$(CXX) $(CXXFLAGS) -dynamiclib -o shared/$@ $^
 
 app: src/main.cpp $(LIB_NAME)
 	mkdir -p exe
 	$(CXX) $(CXXFLAGS) -Lshared -ljsonparser -Wl,-rpath,@executable_path -o exe/app.x src/main.cpp
 
-run: all
+run:
 	./exe/app.x
 
 clean:
-	rm -f *.dylib app
+	rm -f *.dylib *.o
