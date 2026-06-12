@@ -25,11 +25,9 @@ namespace json {
     struct JSON_Value;
 
 
-
-    template <json_key_type JSON_Key>
     struct JSON_Node;
-    using JSON_Dict = JSON_Node<std::string>;
-    using JSON_Prim = JSON_Node<std::monostate>;
+    // using JSON_Dict = JSON_Node<std::string>;
+    // using JSON_Prim = JSON_Node<std::monostate>;
 
 
 
@@ -50,7 +48,7 @@ namespace json {
     };
 
 
-    using json_entry_datatype = std::variant< JSON_Null*, int, float, bool, std::string, JSON_Prim*, JSON_Dict* >;
+    using json_entry_datatype = std::variant< JSON_Null*, int, float, bool, std::string, JSON_Node* >;
     using json_key_datatype = std::variant< JSON_RootKey*, std::string, int >;
 
     inline std::map<int, std::string> json_entry_typenames {

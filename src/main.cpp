@@ -23,17 +23,8 @@ int main() {
     parser.parse();
     std::cout << parser.display() << std::endl;
 
-    // std::string str = "{\"test\":{\"value\": {\"5\": 0.5}},\"flt\":[\"lorem\", [\"test\", \"meow\"]]}";
-    // std::cout << str.substr(1, json::find_closing_symbol_distance(str, '{'));
 
-    // auto test = parser["graph"];
-    auto str_test = parser.operator[]<std::string>("test");
-    auto second = str_test.operator[]("meow");
-    // std::cout << "value: " << str_test << std::endl;
-    // const bool bool_test = parser["graph"].as<bool>("directed");
-    // std::cout << "value: " << bool_test << std::endl;
-    // const float float_test = parser["graph"]["content"]["2"].as<float>("0");
-    // std::cout << "value: " << float_test << std::endl;
-    // auto value = test["@root"];
-    // delete test_int;
+
+    std::cout << 2*parser["test"]["meow"].as<int>() << std::endl;
+
 }

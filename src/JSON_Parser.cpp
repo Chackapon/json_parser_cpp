@@ -87,14 +87,12 @@ namespace json {
 
     std::string JSON_Parser::display() const { return root->display(0); }
 
+    JSON_Node* JSON_Parser::parse(std::string str, int depth, const json_value_type to_type)  {
+        JSON_Node* node;
+        JSON_Node* temp_node;
 
-    template <json_key_type JSON_Key>
-    JSON_Node<JSON_Key>* JSON_Parser::parse(std::string str, int depth, const json_value_type to_type)  {
-        JSON_Node<JSON_Key>* node;
-        std::variant<JSON_Dict*, JSON_Prim*> temp_node;
-
-        if ( to_type == DICT_TYPE ) node = new JSON_Node<JSON_Key>( DICT_TYPE );
-        else if ( to_type == ARR_TYPE ) node = new JSON_Node<JSON_Key>( ARR_TYPE );
+        if ( to_type == DICT_TYPE ) node = new JSON_Node( DICT_TYPE );
+        else if ( to_type == ARR_TYPE ) node = new JSON_Node( ARR_TYPE );
         else throw std::runtime_error("illegal node type parsing data");
 
 
@@ -135,7 +133,7 @@ namespace json {
                         // DUBUG_LOG(state_names[state]);
                         DEBUG_LOG((void*)node);
 
-                        if ( state == DICT_OPENED ) temp_node = parse<std::string>(sub_string, depth+1, DICT_TYPE);
+                        if ( state == DICT_OPENED ) temp_node = parse(sub_string, depth+1, DICT_TYPE);
 
                         remainder = str.substr(0, i+1) + this->remainder_backtrack.back() + str.substr(end_bracket_pos, str.length()-1);
                         this->remainder_backtrack.pop_back();
@@ -172,9 +170,9 @@ namespace json {
 
                         // if ( node->node_value.type == DICT_TYPE ) node->addEntry( key, parsed_value );
                         // if ( node->node_value.type == ARR_TYPE ) node->addEntry( parsed_value );
-                        if ( std::is_same_v<JSON_Key, std::string> ) {
+                        if ( node->is_dictionary_v ) {
                             if ( state == VALUE ) {
-                                node->addEntry( key, new JSON_Prim( JSON_Value(value, type) ) );
+                                node->addEntry( key, new JSON_Node( JSON_Value(value, type) ) );
                             }
                             value = "";
                             state = KEY;
@@ -283,7 +281,7 @@ namespace json {
 
     void JSON_Parser::parse() {
         auto to_parse = single_line_json.substr(1, find_closing_symbol_distance(single_line_json,0,'{')-1);
-        root = parse<std::string>( to_parse+',', 0, DICT_TYPE); // TODO bruh what is this
+        root = parse( to_parse+',', 0, DICT_TYPE); // TODO bruh what is this
         std::cout << "PARSING COMPLETED" << std::endl;
     }
     //endregion
