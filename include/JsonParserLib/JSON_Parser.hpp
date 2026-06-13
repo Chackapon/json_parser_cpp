@@ -16,15 +16,12 @@ namespace json {
         std::string single_line_json;
         std::vector<std::string> remainder_backtrack;
         JSON_Node* root{};
-        JSON_RootKey* root_key{};
 
         bool read_only_;
 
     public:
         explicit JSON_Parser( const bool read_only ): read_only_(read_only) {
-            // const auto root_value = JSON_Value("@root", DICT_TYPE);
             root = new JSON_Node( DICT_TYPE );
-            root->node_value.value = "@root";
         }
 
         void setDirectory(const std::string& path);
@@ -36,8 +33,16 @@ namespace json {
         JSON_Node* parse(std::string str, int depth, json_value_type to_type);
         void parse();
 
-        JSON_Node operator[]( const std::string& key ) const {
+        JSON_Node operator[]( const char* key ) const {
             return root->operator[](key);
+        }
+
+        bool has( const char* key ) const {
+            return root->has(key);
+        }
+
+        JSON_Node operator()() const {
+            return *root;
         }
 
     };

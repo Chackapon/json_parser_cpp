@@ -16,25 +16,20 @@
 
 namespace json {
 
-    template <typename T>
-    concept json_key_type =
-    std::is_same_v<T, std::string> ||
-    std::is_same_v<T, int> ||
-    std::is_same_v<T, std::monostate>;
+    // template <typename T>
+    // concept json_key_type =
+    // std::is_same_v<T, std::string> ||
+    // std::is_same_v<T, int> ||
+    // std::is_same_v<T, std::monostate>;
 
     struct JSON_Value;
-
-
-    struct JSON_Node;
+    class JSON_Node;
     // using JSON_Dict = JSON_Node<std::string>;
     // using JSON_Prim = JSON_Node<std::monostate>;
 
-
-
     struct JSON_Null {};
-    struct JSON_RootKey {};
 
-    enum json_value_type {INTEGER, FLOAT, BOOLEAN, STRING, NULL_TYPE, DICT_TYPE, ARR_TYPE, NONE, UNDEFINED};
+    enum json_value_type {INTEGER, FLOAT, BOOLEAN, STRING, NULL_TYPE, DICT_TYPE, ARR_TYPE, UNDEFINED};
     inline std::map<json_value_type, std::string> type_map {
                 { UNDEFINED, "undefined" },
                 { STRING, "str" },
@@ -42,25 +37,12 @@ namespace json {
                 { FLOAT, "float" },
                 { DICT_TYPE, "dict" },
                 { ARR_TYPE, "arr" },
-                { NONE, "none" },
                 { BOOLEAN, "bool" },
                 { NULL_TYPE, "null" }
     };
 
-
     using json_entry_datatype = std::variant< JSON_Null*, int, float, bool, std::string, JSON_Node* >;
-    using json_key_datatype = std::variant< JSON_RootKey*, std::string, int >;
-
-    inline std::map<int, std::string> json_entry_typenames {
-            {NULL_TYPE, "null"},
-            {INTEGER, "int"},
-            {FLOAT, "float"},
-            {BOOLEAN, "bool"},
-            {STRING, "string"},
-            {DICT_TYPE, "dict"},
-            {ARR_TYPE, "arr"},
-            {999, "prim"},
-        };
+    using json_key_datatype = std::variant< int, std::string >;
 
     enum state {CURIOUS, END, DICT_OPENED, DICT_CLOSED, DICTIONARY, ARR_OPENED, ARR_CLOSED, ARRAY, KEY, VALUE};
     inline std::map<state, std::string> state_names {

@@ -13,12 +13,10 @@ namespace json {
     struct JSON_Value {
         json_entry_datatype value;
         json_value_type type{};
+        std::string as_str;
 
         JSON_Value( const std::string& str_val, json_value_type to_type );
         ~JSON_Value() = default;
-
-        // JSON_Value* setValue( const std::string& str_value, json_value_type to_type );
-        // JSON_Value* setValue( JSON_Node* dict_node, json_value_type to_type );
     };
 } // json
 
