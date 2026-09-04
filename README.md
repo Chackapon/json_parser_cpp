@@ -23,6 +23,7 @@ JSON_Object has two function for data extraction:
 
 - Overloaded operator[] that returns a JSON_Object object. This allows for nested calls, for example ``` parser["users"]["John"] ``` which returns a JSON_Object object. The returned object is equivalent to a JSON dictionary
 - ```as<T>()``` function which servers as the [] operator for the last step, example ``` parser["users"]["John"].as<std::string>("name") ``` for a string type record. The reason it has to be this way is operator[] can't be overloaded twice with just changing the return type. This function returns the std::variant's exact value, so besides from specifying the T type you don't have to do anything else.
+- ```keys()``` function for JSON objects that returns a set of all of the keys the dictionary has.
 
 ## Version history
 * [09.06.26, 03:09] v0.1: first public release. Still a lot to be done but the basic parser object is complete
