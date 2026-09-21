@@ -11,6 +11,7 @@ $(LIB_NAME): src/library.cpp
 
 app: src/main.cpp $(LIB_NAME)
 	mkdir -p exe
+	mkdir -p shared
 	$(CXX) $(CXXFLAGS) -Lshared -ljsonparser -Wl,-rpath,@executable_path -o exe/app.x src/main.cpp
 
 run: all
