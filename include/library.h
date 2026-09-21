@@ -13,6 +13,7 @@
 #include <iostream>
 #include <unordered_map>
 #include <variant>
+#include <algorithm>
 
 // FIXME graph json exporters use capital first letter string versions of true and false, to be fixed
 
