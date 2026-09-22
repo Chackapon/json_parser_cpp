@@ -8,7 +8,9 @@
 #include <algorithm>
 #include <variant>
 #include <ranges>
-#include <format>
+#include <stdexcept>
+#include <string>
+
 
 // #define DEBUG_DISPLAY
 
@@ -35,7 +37,9 @@ namespace json {
                 // DEBUG_DISPLAY("* CHILD NODE {}, type={}\n", (void*)(child), type_map[child->node_value.type]);
             }
 
-            result += std::format("{}(", type_map[this->node_value.type]);
+
+            result += type_map[this->node_value.type];
+            result += "(";
 
             if ( is_primitive_v ) {
 
@@ -63,8 +67,20 @@ namespace json {
                 if (!this->children.empty()) result += "\n";
                 for ( auto [key, value] : this->children ) {
                     for (int tab_it = 0; tab_it<depth; ++tab_it) result+='\t';
-                    if (is_dictionary_v) result += std::format("\tstr({}) : {}\n", std::get<std::string>(key), value->display(depth+1));
-                    else result += std::format("\tint({}) : {}\n", std::get<int>(key), value->display(depth+1));
+                    if (is_dictionary_v) {
+                        result += "str(";
+                        result += std::get<std::string>(key);
+                        result += ") : ";
+                        result += value->display(depth+1);
+                        result += "\n";
+                    }
+                    else {
+                        result += "int(";
+                        result += std::get<int>(key);
+                        result += ") : ";
+                        result += value->display(depth+1);
+                        result += "\n";
+                    }
                 }
             }
 
@@ -106,7 +122,7 @@ namespace json {
         auto result = find_node( key_wrapper );
         if ( result != nullptr) return *result;
 
-        throw std::runtime_error(std::format("index not found: {}", key));
+        throw std::runtime_error(std::string("index not found: ") + key);
         //for debug
         // std::cout << "[JSON_Node] entered key: ";
         // if ( is_dictionary_v ) std::cout << std::get<std::string>(key) << std::endl;

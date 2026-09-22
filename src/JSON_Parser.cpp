@@ -8,7 +8,7 @@
 #include <fstream>
 #include <iostream>
 #include <string>
-#include <format>
+
 
 // #define DEBUG_LOG
 
@@ -24,7 +24,7 @@ size_t find_closing_quote_distance(const std::string& str, const size_t pos) {
         bool quote_opened = false;
 
         while ( current_bracket_position < str.length() ) {
-            // DEBUG_LOG(std::format("{} char at pos i={} is '{}'", spotted_new_brackets, current_bracket_position, str[current_bracket_position]))
+
 
             if ( str[current_bracket_position] == '\"' ) {
                 if ( quote_opened ) {
@@ -38,7 +38,7 @@ size_t find_closing_quote_distance(const std::string& str, const size_t pos) {
             }
             ++current_bracket_position;
         }
-        throw std::runtime_error(std::format("closing quote not found"));
+        throw std::runtime_error("closing quote not found");
     }
 
 size_t find_closing_symbol_distance(const std::string& str, const size_t pos, const char symbol) {
@@ -52,7 +52,7 @@ size_t find_closing_symbol_distance(const std::string& str, const size_t pos, co
         bool string_mode = false;
 
         while ( current_bracket_position < str.length() ) {
-            // DEBUG_LOG(std::format("{} char at pos i={} is '{}'", spotted_new_brackets, current_bracket_position, str[current_bracket_position]))
+
 
             if ( str[current_bracket_position] == '\"' ) string_mode = !string_mode;
             else if ( str[current_bracket_position] == symbol and !string_mode ) {
@@ -65,7 +65,7 @@ size_t find_closing_symbol_distance(const std::string& str, const size_t pos, co
 
             ++current_bracket_position;
         }
-        throw std::runtime_error(std::format("closing symbol for {} not found in <{}>", symbol, str));
+        throw std::runtime_error( std::string("closing symbol for ") + symbol + " not found in <" + str + ">" );
     }
 
 namespace json {
@@ -109,7 +109,7 @@ namespace json {
         json_value_type type = INTEGER; // default should be int
 
         for ( int i = 0; i < str.length(); i++ ) {
-                // std::cout << std::format("> [DEPTH={}] Character at {}/{}: \'{}\' (state={}); (type={})", depth, i, str.length(), str[i], state_names[state], type_map[type]) << std::endl;
+
 
 
 
@@ -153,12 +153,12 @@ namespace json {
                     case '}': {
                         if (state == DICT_OPENED) {
                             node->addEntry( key, temp_node );
-                            DEBUG_LOG(std::format("adding dict {}, key={} size={}", (void*)temp_node, key, temp_node->children.size()));
+                            // DEBUG_LOG(std::format("adding dict {}, key={} size={}", (void*)temp_node, key, temp_node->children.size()));
                             state = DICT_CLOSED;
                         }
                         else if (state == ARR_OPENED) {
                             node->addEntry( key, temp_node );
-                            DEBUG_LOG(std::format("adding arr {}, key={} size={}", (void*)temp_node, key, temp_node->children.size()));
+                            // DEBUG_LOG(std::format("adding arr {}, key={} size={}", (void*)temp_node, key, temp_node->children.size()));
                             state = ARR_CLOSED;
                         }
                         else state = VALUE;
@@ -181,7 +181,7 @@ namespace json {
                             if ( state == VALUE ) {
                                 if ( value == "true" or value == "false" ) type = BOOLEAN;
                                 if ( value == "null" ) type = NULL_TYPE;
-                                DEBUG_LOG(std::format("adding to dict key={}, val={}", key, value));
+                                // DEBUG_LOG(std::format("adding to dict key={}, val={}", key, value));
                                 node->addEntry( key, new JSON_Node( JSON_Value(value, type) ) );
                             }
                             value = "";
@@ -191,7 +191,7 @@ namespace json {
                             if ( state == KEY and !key.empty() ) {
                                 if ( key == "true" or key == "false" ) type = BOOLEAN;
                                 if ( key == "null" ) type = NULL_TYPE;
-                                DEBUG_LOG(std::format("adding to array val={}", key));
+                                // DEBUG_LOG(std::format("adding to array val={}", key));
                                 node->addEntry( "", new JSON_Node( JSON_Value(key, type) ) );
                             }
                             key = "";
@@ -260,7 +260,7 @@ namespace json {
                 }
             }
 
-        // DEBUG_LOG(std::format("Current node children size: {}", node->children.size()));
+
         // std::cout <<"RETURNING NODE " << node << std::endl;
         return node;
     }
