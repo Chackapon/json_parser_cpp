@@ -7,6 +7,8 @@
 #include <iostream>
 #include <algorithm>
 #include <variant>
+#include <ranges>
+#include <format>
 
 // #define DEBUG_DISPLAY
 
