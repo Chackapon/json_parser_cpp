@@ -78,7 +78,7 @@ namespace json {
         return nullptr;
     }
 
-    JSON_Node JSON_Node::operator[]( const int index ) {
+    JSON_Node& JSON_Node::operator[]( const int index ) {
         if ( this->children.empty() ) throw std::runtime_error("Can't index an empty JSON node");
         if ( is_primitive_v ) throw NotSubscribtable();
         if ( is_dictionary_v ) throw std::runtime_error("Can't index dictionary with an integer index: " + std::to_string(index));
@@ -86,18 +86,19 @@ namespace json {
         const std::variant<int, std::string> key_wrapper = index;
 
         if (auto result = find_node( key_wrapper ); result != nullptr) return *result;
-        throw std::runtime_error("index not found");
+        throw std::runtime_error("index not found: " + std::to_string(index));
     }
 
-    JSON_Node JSON_Node::operator[](const char* key) {
+    JSON_Node& JSON_Node::operator[](const char* key) {
         if ( this->children.empty() ) throw std::runtime_error("Can't index an empty JSON node");
         if ( is_primitive_v ) throw NotSubscribtable();
-        if ( is_array_v ) throw std::runtime_error("Can't index array with a string key: " + std::string(key));
+        if ( is_array_v ) throw BadArrayIndex(key);
 
         const std::variant<int, std::string> key_wrapper = key;
 
         if (auto result = find_node( key_wrapper ); result != nullptr) return *result;
-        throw std::runtime_error("index not found");
+
+        throw std::runtime_error(std::format("index not found: {}", key));
         //for debug
         // std::cout << "[JSON_Node] entered key: ";
         // if ( is_dictionary_v ) std::cout << get<std::string>(key) << std::endl;

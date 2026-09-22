@@ -73,16 +73,19 @@ namespace json {
     }
 
     void JSON_Parser::importFile(const std::string &filename)  {
+        single_line_json = "";
         std::ifstream input_file(json_directory+"/"+filename);
         std::string line;
 
         while ( getline(input_file, line) ) {
             single_line_json += stripWhitespace(line); // FIXME this function probably strips spaces in strings
         }
+        // std::cout << single_line_json << std::endl;
+        input_file.close();
     }
 
     void JSON_Parser::importString(const std::string &str) {
-        single_line_json += stripWhitespace(str);
+        single_line_json = stripWhitespace(str);
     }
 
     std::string JSON_Parser::display() const { return root->display(0); }
@@ -96,7 +99,7 @@ namespace json {
         else throw std::runtime_error("illegal node type parsing data");
 
 
-        std::cout << "@ Depth " << depth << ": " << str << std::endl;
+        // std::cout << "@ Depth " << depth << ": " << str << std::endl;
         // TODO not all of those enum values are used, cleanup
 
         state state = KEY;
@@ -104,7 +107,7 @@ namespace json {
         json_value_type type = INTEGER; // default should be int
 
         for ( int i = 0; i < str.length(); i++ ) {
-                std::cout << std::format("> [DEPTH={}] Character at {}/{}: \'{}\' (state={}); (type={})", depth, i, str.length(), str[i], state_names[state], type_map[type]) << std::endl;
+                // std::cout << std::format("> [DEPTH={}] Character at {}/{}: \'{}\' (state={}); (type={})", depth, i, str.length(), str[i], state_names[state], type_map[type]) << std::endl;
 
 
 
@@ -160,7 +163,7 @@ namespace json {
                         break;
                     }
                     case ':': {
-                        std::cout << "Semicolon, changing to VALUE if KEY" << std::endl;
+                        // std::cout << "Semicolon, changing to VALUE if KEY" << std::endl;
                         if (state == KEY) {
                             state = VALUE;
                         }
@@ -201,11 +204,11 @@ namespace json {
                         const std::string sub_string = str.substr(i+1, end_bracket_pos - i - 1);
 
                         if (state == KEY) {
-                            std::cout << "Quotation mark spotted when reading key" << std::endl;
+                            // std::cout << "Quotation mark spotted when reading key" << std::endl;
                             key = sub_string;
                         }
                         if (state == VALUE) {
-                            std::cout << "Quotation mark spotted when reading value" << std::endl;
+                            // std::cout << "Quotation mark spotted when reading value" << std::endl;
                             value = sub_string;
 
                         }
@@ -244,9 +247,9 @@ namespace json {
                 }
 
                 if ( i == str.length()-1 ) {
-                    std::cout << "SUBSECTION END at " << i << "/" << str.length()-1 << std::endl;
+                    // std::cout << "SUBSECTION END at " << i << "/" << str.length()-1 << std::endl;
 
-                    std::cout << "! Remainder: " << str.substr(i) << std::endl;
+                    // std::cout << "! Remainder: " << str.substr(i) << std::endl;
 
                     if ( i != str.length()-1 ) this->remainder_backtrack.push_back( str.substr(i) );
                     else this->remainder_backtrack.push_back("");
@@ -256,14 +259,14 @@ namespace json {
             }
 
         // DEBUG_LOG(std::format("Current node children size: {}", node->children.size()));
-        std::cout <<"RETURNING NODE " << node << std::endl;
+        // std::cout <<"RETURNING NODE " << node << std::endl;
         return node;
     }
 
     void JSON_Parser::parse() {
         auto to_parse = single_line_json.substr(1, find_closing_symbol_distance(single_line_json,0,'{')-1);
         root = parse( to_parse+',', 0, DICT_TYPE); // TODO bruh what is this
-        std::cout << "PARSING COMPLETED" << std::endl;
+        // std::cout << "PARSING COMPLETED" << std::endl;
     }
     //endregion
 }

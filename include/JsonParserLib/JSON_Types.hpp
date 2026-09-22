@@ -5,9 +5,9 @@
 #ifndef JSON_PARSER_JSON_TYPES_HPP
 #define JSON_PARSER_JSON_TYPES_HPP
 
-// #define DEBUG_LOG(x)
+#define DEBUG_LOG(x)
 
-#ifndef DEBUG
+#ifndef DEBUG_LOG
 #define DEBUG_LOG(x) std::cout << x << std::endl;
 #endif
 

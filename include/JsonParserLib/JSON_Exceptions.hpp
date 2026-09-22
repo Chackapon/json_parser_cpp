@@ -11,4 +11,8 @@ struct NotSubscribtable : std::runtime_error {
     NotSubscribtable(): std::runtime_error("This node is not subscriptable") {};
 };
 
+struct BadArrayIndex : std::runtime_error {
+    BadArrayIndex( const std::string& key ): std::runtime_error("Can't index array with a string key: " + key) {};
+};
+
 #endif //JSON_PARSER_JSON_EXCEPTIONS_HPP

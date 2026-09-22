@@ -41,8 +41,8 @@ namespace json {
             return root->has(key);
         }
 
-        JSON_Node operator()() const {
-            return *root;
+        JSON_Node* operator()() const {
+            return root;
         }
 
     };

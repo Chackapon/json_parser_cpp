@@ -10,6 +10,7 @@
 #include <stdexcept>
 #include <unordered_map>
 #include <vector>
+#include <cassert>
 
 
 #include "JSON_Exceptions.hpp"
@@ -57,8 +58,8 @@ namespace json {
 
         void addEntry( const std::string& dict_key, JSON_Node* dict_val );
 
-        JSON_Node operator[](int index);
-        JSON_Node operator[](const char* key);
+        JSON_Node& operator[](int index);
+        JSON_Node& operator[](const char* key);
 
         template <typename T>
         T as() {
@@ -92,8 +93,10 @@ namespace json {
         std::list<T> as_list() {
             auto result = std::list<T>();
             if (is_array_v) {
-                for ( int i = 0; i < this->children.size(); i++ ) {
-                    auto child_node = this->children[i];
+                for (int i = 0; i < this->children.size(); ++i) {
+                    auto find_node = children.find(i);
+                    assert( find_node != this->children.end());
+                    auto child_node = find_node->second;
                     if ( std::holds_alternative<T>( child_node->node_value.value ) and child_node->is_primitive_v ) {
                         result.push_back( child_node->as<T>() );
                     }
