@@ -1,21 +1,37 @@
-CXX = g++-15
+CXX = g++
 CXXFLAGS = -std=c++23 -Iinclude -fPIC
-# Iinclude - allows to get rid of relative paths in includes
 
-LIB_NAME = libjsonparser.dylib
+UNAME_S := $(shell uname -s)
 
-all: $(LIB_NAME) app
+ifeq ($(UNAME_S),Darwin)
+    LIB_NAME = libjsonparser.dylib
+    SHARED_FLAG = -dynamiclib
+    RPATH = -Wl,-rpath,@executable_path/../shared
+else ifeq ($(UNAME_S),Linux)
+    LIB_NAME = libjsonparser.so
+    SHARED_FLAG = -shared
+    RPATH = -Wl,-rpath,'$$ORIGIN/../shared'
+else
+    $(error Unsupported OS: $(UNAME_S))
+endif
 
-$(LIB_NAME): src/library.cpp
-	$(CXX) $(CXXFLAGS) -dynamiclib -o shared/$@ $^
+LIB_PATH = shared/$(LIB_NAME)
+APP_PATH = exe/app.x
 
-app: src/main.cpp $(LIB_NAME)
-	mkdir -p exe
+.PHONY: all run clean
+
+all: $(LIB_PATH) $(APP_PATH)
+
+$(LIB_PATH): src/JSON_Parser.cpp src/JSON_Node.cpp src/JSON_Value.cpp
 	mkdir -p shared
-	$(CXX) $(CXXFLAGS) -Lshared -ljsonparser -Wl,-rpath,@executable_path -o exe/app.x src/main.cpp
+	$(CXX) $(CXXFLAGS) $(SHARED_FLAG) -o $@ $^
+
+$(APP_PATH): src/main.cpp $(LIB_PATH)
+	mkdir -p exe
+	$(CXX) $(CXXFLAGS) src/main.cpp $(LIB_PATH) $(RPATH) -o $@
 
 run: all
-	./exe/app.x
+	./$(APP_PATH)
 
 clean:
-	rm -f *.dylib app
+	rm -rf shared exe
