@@ -10,6 +10,8 @@
 #include <string>
 #include <format>
 
+// #define DEBUG_LOG
+
 std::string stripWhitespace(std::string str) {
     (void)str.erase(std::ranges::remove_if(str, ::isspace).begin(), str.end());
     return str;
@@ -139,7 +141,7 @@ namespace json {
 
                         remainder = str.substr(0, i+1) + this->remainder_backtrack.back() + str.substr(end_bracket_pos, str.length()-1);
                         this->remainder_backtrack.pop_back();
-                        DEBUG_LOG("* New remainder: " << remainder)
+                        DEBUG_LOG("* New remainder: " << remainder);
                         str = remainder;
 
                         if (str[i] == '{') type = DICT_TYPE;

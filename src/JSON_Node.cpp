@@ -41,16 +41,16 @@ namespace json {
 
                 switch ( this->node_value.type ) {
                     case STRING:
-                        result += get<std::string>(this->node_value.value);
+                        result += std::get<std::string>(this->node_value.value);
                         break;
                     case INTEGER:
-                        result += std::to_string( get<int>(this->node_value.value) );
+                        result += std::to_string( std::get<int>(this->node_value.value) );
                         break;
                     case FLOAT:
-                        result += std::to_string( get<float>(this->node_value.value) );
+                        result += std::to_string( std::get<float>(this->node_value.value) );
                         break;
                     case BOOLEAN:
-                        if ( get<bool>(this->node_value.value) ) result += "true";
+                        if ( std::get<bool>(this->node_value.value) ) result += "true";
                         else result += "false";
                         break;
                     case NULL_TYPE:
@@ -63,8 +63,8 @@ namespace json {
                 if (!this->children.empty()) result += "\n";
                 for ( auto [key, value] : this->children ) {
                     for (int tab_it = 0; tab_it<depth; ++tab_it) result+='\t';
-                    if (is_dictionary_v) result += std::format("\tstr({}) : {}\n", get<std::string>(key), value->display(depth+1));
-                    else result += std::format("\tint({}) : {}\n", get<int>(key), value->display(depth+1));
+                    if (is_dictionary_v) result += std::format("\tstr({}) : {}\n", std::get<std::string>(key), value->display(depth+1));
+                    else result += std::format("\tint({}) : {}\n", std::get<int>(key), value->display(depth+1));
                 }
             }
 
@@ -109,11 +109,11 @@ namespace json {
         throw std::runtime_error(std::format("index not found: {}", key));
         //for debug
         // std::cout << "[JSON_Node] entered key: ";
-        // if ( is_dictionary_v ) std::cout << get<std::string>(key) << std::endl;
-        // if ( is_array_v ) std::cout << std::to_string(get<int>(key)) << std::endl;
+        // if ( is_dictionary_v ) std::cout << std::get<std::string>(key) << std::endl;
+        // if ( is_array_v ) std::cout << std::to_string(std::get<int>(key)) << std::endl;
         // for (const auto& [child_key, child_node] : this->children) {
-        //     if ( is_array_v ) std::cout << "[JSON_Node] current node keys: " << std::to_string( get<int>(child_key) ) << " of type " << type_map[child_node->node_value.type] << std::endl;
-        //     if ( is_dictionary_v ) std::cout << "[JSON_Node] current node keys: " << get<std::string>(child_key) << " of type " << type_map[child_node->node_value.type] << std::endl;
+        //     if ( is_array_v ) std::cout << "[JSON_Node] current node keys: " << std::to_string( std::get<int>(child_key) ) << " of type " << type_map[child_node->node_value.type] << std::endl;
+        //     if ( is_dictionary_v ) std::cout << "[JSON_Node] current node keys: " << std::get<std::string>(child_key) << " of type " << type_map[child_node->node_value.type] << std::endl;
         // }
     }
     //endregion
@@ -129,13 +129,9 @@ namespace json {
     }
 
     bool JSON_Node::has( const char* key) {
-        // if ( !this->is_dictionary_v ) throw std::runtime_error("Trying to find a key in a non dictionary object");
 
-        // for ( auto [key, child] : this->children ) {
-        //     std::cout << get<std::string>(key) << std::endl;
-        // }
 
-        const auto it = std::ranges::find_if(this->children, [key](const std::pair<json_key_datatype, JSON_Node*> &p) { return get<std::string>(p.first) == key; } );
+        const auto it = std::ranges::find_if(this->children, [key](const std::pair<json_key_datatype, JSON_Node*> &p) { return std::get<std::string>(p.first) == key; } );
         return it != this->children.end();
     }
 } // json
