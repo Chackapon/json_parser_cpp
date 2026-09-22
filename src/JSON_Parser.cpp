@@ -13,7 +13,7 @@
 // #define DEBUG_LOG
 
 std::string stripWhitespace(std::string str) {
-    (void)str.erase(std::ranges::remove_if(str, ::isspace).begin(), str.end());
+    str.erase(std::remove_if(str.begin(), str.end(), ::isspace), str.end());
     return str;
 }
 

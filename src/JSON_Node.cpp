@@ -5,11 +5,11 @@
 #include "../include/JsonParserLib/JSON_Node.hpp"
 
 #include <iostream>
-#include <algorithm>
 #include <variant>
 #include <ranges>
 #include <stdexcept>
 #include <string>
+#include <algorithm>
 
 
 // #define DEBUG_DISPLAY
@@ -145,9 +145,13 @@ namespace json {
     }
 
     bool JSON_Node::has( const char* key) {
-
-
-        const auto it = std::ranges::find_if(this->children, [key](const std::pair<json_key_datatype, JSON_Node*> &p) { return std::get<std::string>(p.first) == key; } );
+        const auto it = std::find_if(
+            this->children.begin(),
+            this->children.end(),
+            [key](const std::pair<json_key_datatype, JSON_Node*> &p) {
+                return std::get<std::string>(p.first) == key;
+            }
+        );
         return it != this->children.end();
     }
 } // json

@@ -1,5 +1,5 @@
 
-CXXFLAGS = -std=c++11 -Iinclude -fPIC
+CXXFLAGS = -std=c++17 -Iinclude -fPIC
 
 UNAME_S := $(shell uname -s)
 
