@@ -12,19 +12,19 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install GCC 15
+      - name: Install GCC
         run: |
           sudo apt-get update
-          sudo apt-get install -y g++-15
+          sudo apt-get install -y g++
 
       - name: Build
         run: |
           make clean
-          CXX=g++-15 make
+          CXX=g++ make
 
       - name: Run
         run: |
-          CXX=g++-15 make run
+          CXX=g++ make run
 
       - name: Upload Linux library
         uses: actions/upload-artifact@v4

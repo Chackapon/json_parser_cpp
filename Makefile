@@ -1,13 +1,15 @@
-CXX = g++
+
 CXXFLAGS = -std=c++23 -Iinclude -fPIC
 
 UNAME_S := $(shell uname -s)
 
 ifeq ($(UNAME_S),Darwin)
+	CXX = g++-15
     LIB_NAME = libjsonparser.dylib
     SHARED_FLAG = -dynamiclib
     RPATH = -Wl,-rpath,@executable_path/../shared
 else ifeq ($(UNAME_S),Linux)
+	CXX = g++
     LIB_NAME = libjsonparser.so
     SHARED_FLAG = -shared
     RPATH = -Wl,-rpath,'$$ORIGIN/../shared'
